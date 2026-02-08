@@ -22,6 +22,7 @@ const createWindow = () => {
     y: 0,
     width,
     height,
+    frame: false,
     icon: 'assets/logo1024.png',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),

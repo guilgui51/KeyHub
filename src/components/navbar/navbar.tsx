@@ -186,7 +186,7 @@ export default function Navbar() {
 
     return (
         <>
-            <nav className="shrink-0 flex items-center bg-gray-900 border-b border-gray-800 px-3 py-2 gap-3">
+            <nav className="shrink-0 flex items-center bg-gray-900 border-b border-gray-800 px-3 py-2 gap-3" style={{ WebkitAppRegion: "drag" } as React.CSSProperties}>
                 {/* Logo */}
                 <div className="flex flex-col items-center mr-2 shrink-0">
                     <img src={logo} alt="Logo" className="h-8 w-auto" />
@@ -216,7 +216,7 @@ export default function Navbar() {
 
                 {/* Server status + Translation usage */}
                 {hasFolder && (
-                    <div className="flex flex-col gap-1 px-3 py-1.5 rounded-lg bg-gray-800/50 shrink-0">
+                    <div className="flex flex-col gap-1 px-3 py-1.5 rounded-lg bg-gray-800/50 shrink-0" style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}>
                         <div className="flex items-center gap-2">
                             <span className={`inline-block w-2 h-2 rounded-full ${serverRunning ? "bg-green-500" : "bg-gray-600"}`} />
                             <span className="text-xs text-gray-400">
@@ -370,6 +370,7 @@ function NavButton({icon, label, onClick, variant}: {
     return (
         <button
             onClick={onClick}
+            style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
             className={`flex flex-col items-center justify-center w-14 h-14 rounded-lg transition-colors cursor-pointer shrink-0 ${base}`}
         >
             <FontAwesomeIcon icon={icon} className="text-lg" />
