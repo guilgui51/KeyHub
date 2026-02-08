@@ -1,7 +1,7 @@
 {
   "name": "KeyHub",
   "productName": "KeyHub",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "An electron app for i18next key translation",
   "main": ".vite/build/main.js",
   "scripts": {
