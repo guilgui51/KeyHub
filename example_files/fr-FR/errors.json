@@ -1,0 +1,14 @@
+{
+    "A required field is empty": "Un champs requis est vide",
+    "required": "requis",
+    "success": "succès",
+    "Error" : "Erreur",
+    "Success": "Succès",
+    "Test method already exist" : "La méthode d'évaluation '{{param_1}}' existe déjà.",
+    "This field cannot be empty": "Ce champs ne peut pas être vide",
+    "This field is required": "Ce champ est requis",
+    "Genereted learning objective": {
+        "success": "Les objectifs pédagogiques ont été générés.",
+        "error": "Erreur : les objectifs pédagogiques n’ont pas pu être générés."
+    }
+}

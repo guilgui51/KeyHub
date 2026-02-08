@@ -1,0 +1,10 @@
+{
+  "date": "{{date, datetime}}",
+  "date range": "From {{startingDate, datetime}} to {{endingDate, datetime}}",
+  "started on": "Started on {{date, datetime}}",
+  "created on": "Created on {{date, datetime}}",
+  "modified on": "Modified on {{date, datetime}}",
+  "imported on": "Imported on {{date, datetime}}",
+  "from": "From",
+  "to": "to"
+}

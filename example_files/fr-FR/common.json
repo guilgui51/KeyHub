@@ -1,0 +1,45 @@
+{
+  "Add": "Ajouter",
+  "After form validation": "Après validation du formulaire",
+  "Consequences will be": "Cela aura pour conséquence",
+  "Informations": "Informations",
+  "Job": "Métier",
+  "Learning objectives only associated to this one, will change to « Cancelled » status": "Le passage au statut « Annulé » des objectifs pédagogiques uniquement associés à celle-ci",
+  "loading": "chargement",
+  "Verbs mapping": "Paramétrage de l’influence des verbes",
+  "massCreation": "Création en masse",
+  "More": "Plus",
+  "No results found" : "Aucun résultat trouvé",
+  "Nothing will be saved": "Aucune modification ne sera enregistrée.",
+  "Required": "Requis",
+  "item will not be associated anymore to {{object}}": "cet élément ne sera pas supprimé de la base de données, mais ne sera plus associé à {{object}}.",
+  "Rationale": "Justification",
+  "resource will be definitely deleted from": "Les ressources sélectionnées seront définitivement supprimées de {{object}}",
+  "Subtask": "Sous-tâche",
+  "Subtask train": "Sous-tâche d'entraînement",
+  "Step": "Step",
+  "Target audience": "Public cible",
+  "Task": "Tâche",
+  "Task train": "Tâche d'entraînement",
+  "Training subtasks will be deleted, if any": "La suppression de ses sous-tâches d'entrainement associées, si elle en possède",
+  "Training task not initialised": "Tâche d'entraînement non initialisée",
+
+  "the subtask": "la sous-tâche",
+  "the task": "la tâche",
+
+  "unitaryCreation": "Création unitaire",
+
+  "Creating target audience" : "Création d'un public cible",
+  
+  "action": {
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "confirmRemoval": "Confirmer la suppression",
+    "create": "Créer",
+    "creation": "Création",
+    "edit": "Éditer",
+    "modification": "Modification",
+    "remove": "Supprimer",
+    "validate": "Valider"
+  }
+}

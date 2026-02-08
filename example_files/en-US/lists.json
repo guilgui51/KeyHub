@@ -1,0 +1,51 @@
+{
+    "Create first element": {
+      "default": "Create my first element",
+      "project": "Create my first project",
+      "user": "Create my first user",
+      "job": "Create my first job",
+      "ksa": "Create my first KSA",
+      "target audience": "Create my first target audience",
+      "task": "Create my first task",
+      "organization": "Create my first organization !",
+      "training method": "Create my first training method !",
+      "test method": "Create my first test method !",
+      "document": "Create my first document !",
+      "learning objective": "Create my first learning objective !"
+    },
+    "No results found": {
+      "default": "No results found",
+      "project": "No projects found",
+      "user": "No users found",
+      "job": "No jobs found",
+      "target audience": "No targets audiences found",
+      "task train": "No tasks trains found",
+      "task": "No tasks found",
+      "training method": "No training methods found",
+      "test method": "No test methods found",
+      "organization": "No organizations found",
+      "document": "No documents found",
+      "learning objective": "No learning objective found",
+      "gap": "No gaps found"
+    },
+    "No elements": {
+      "default": "No elements, start now !",
+      "project": "No projects, start now !",
+      "user": "No users, start now !",
+      "job": "No jobs, start now !",
+      "ksa": {
+        "task train" : "No KSA, start now by editing your subtask train !",
+        "target audience" : "No KSA, start now in edit mode !"
+      },
+      "target audience": "No targets audiences, start now !",
+      "task": "No tasks, start now !",
+      "task train": "No tasks trains, start now !",
+      "progress task": "No progress task !",
+      "organization": "No organizations, start now !",
+      "training method": "No training methods, start now !",
+      "test method": "No test methods, start now !",
+      "document": "No documents, start now !",
+      "learning objective": "No learning objectives, start now !",
+      "gap": "No gaps !"
+    }
+}

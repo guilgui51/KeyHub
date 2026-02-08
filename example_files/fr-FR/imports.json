@@ -1,0 +1,9 @@
+{
+  "type": "Un import de type <strong>{{type}}</strong> sera effectué.",
+  "types": {
+    "S3000LV2Xml": "Xml S3000L V2"
+  },
+  "project creation": "Le projet <strong>{{project}}</strong> sera créé lors de l'import.",
+  "project": "Le projet <strong>{{project}}</strong> sera utilisé pour importer les données.",
+  "invalid format": "Ce type de fichier n'est pas importable dans l'application."
+}
