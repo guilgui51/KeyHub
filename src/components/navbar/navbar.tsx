@@ -58,7 +58,7 @@ export default function Navbar() {
         for (const lang of settings.languages) {
             for (const f of lang.files) ns.add(f.namespace);
         }
-        setNamespaces([...ns].sort());
+        setNamespaces([...ns].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })));
     };
 
     const loadServerStatus = async () => {

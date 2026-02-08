@@ -94,7 +94,7 @@ function removeNestedKey(obj: Record<string, unknown>, dottedKey: string) {
 /** Recursively sort object keys alphabetically */
 function sortDeep(obj: Record<string, unknown>): Record<string, unknown> {
     const sorted: Record<string, unknown> = {};
-    for (const key of Object.keys(obj).sort()) {
+    for (const key of Object.keys(obj).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))) {
         const val = obj[key];
         sorted[key] = val && typeof val === "object" && !Array.isArray(val)
             ? sortDeep(val as Record<string, unknown>)
@@ -218,7 +218,7 @@ export function registerTranslationHandlers() {
 
         const result: NamespaceData[] = [];
 
-        for (const ns of [...allNamespaces].sort()) {
+        for (const ns of [...allNamespaces].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))) {
             const langMaps: Record<string, FlatJson> = {};
             const allKeys = new Set<string>();
 
@@ -233,7 +233,7 @@ export function registerTranslationHandlers() {
                 }
             }
 
-            const keys = [...allKeys].sort().map((key) => ({
+            const keys = [...allKeys].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })).map((key) => ({
                 key,
                 values: Object.fromEntries(
                     langCodes.map((code) => [code, langMaps[code]?.[key] ?? null])

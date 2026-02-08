@@ -132,11 +132,16 @@ export default function ServerSettings() {
                         <pre className="bg-gray-800 rounded p-3 text-xs text-gray-300 overflow-x-auto">
 {`i18next.init({
   saveMissing: true,
-  saveMissingTo: "all",
-  missingKeyHandler: false,
-  backend: {
-    loadPath: "/locales/{{lng}}/{{ns}}.json",
-    addPath: "http://localhost:${portInput}/locales/{{lng}}/{{ns}}",
+        saveMissingTo: "current",
+        missingKeyHandler: (lng, ns, key, fallbackValue) => {
+            fetch(\`http://localhost:5874/locales/\${lng}/\${ns}\`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+            key,
+            value: fallbackValue
+        })
+    })
   },
 });`}
                         </pre>
