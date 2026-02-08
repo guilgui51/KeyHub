@@ -6,35 +6,11 @@ import {MakerRpm} from '@electron-forge/maker-rpm';
 import {VitePlugin} from '@electron-forge/plugin-vite';
 import {FusesPlugin} from '@electron-forge/plugin-fuses';
 import {FuseV1Options, FuseVersion} from '@electron/fuses';
-import fs from "fs-extra";
-import path from "path";
 
 const config: ForgeConfig = {
   packagerConfig: {
     icon: 'src/assets/logo',
     asar: true,
-    extraResource: [
-      "prisma/app.db",
-      "node_modules_copy/node_modules",
-    ]
-  },
-  hooks: {
-    // ✅ custom hook to preserve correct node_modules structure
-    prePackage: async () => {
-      const sourcePrisma = path.resolve("node_modules/.prisma");
-      const sourceClient = path.resolve("node_modules/@prisma");
-      const targetBase = path.resolve("node_modules_copy/node_modules");
-
-      await fs.ensureDir(path.join(targetBase, ".prisma"));
-      await fs.ensureDir(path.join(targetBase, "@prisma"));
-
-      console.log("Copying Prisma client for packaging...");
-      await fs.copy(sourcePrisma, path.join(targetBase, ".prisma"));
-      await fs.copy(sourceClient, path.join(targetBase, "@prisma"));
-      console.log("✅ Prisma client copied");
-
-
-    },
   },
   rebuildConfig: {},
   makers: [

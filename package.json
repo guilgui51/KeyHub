@@ -1,7 +1,7 @@
 {
   "name": "KeyHub",
   "productName": "KeyHub",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "An electron app for i18next key translation",
   "main": ".vite/build/main.js",
   "scripts": {
@@ -9,24 +9,12 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx .",
-    "studio": "npx prisma studio"
+    "lint": "eslint --ext .ts,.tsx ."
   },
   "keywords": [],
   "author": {
     "name": "FerVst",
     "email": "guilgui51@hotmail.fr"
-  },
-  "prisma": {
-    "clientOutput": "node_modules/.prisma/client"
-  },
-  "build": {
-    "extraResources": [
-      {
-        "from": "node_modules/.prisma",
-        "to": "app.asar.unpacked/node_modules/.prisma"
-      }
-    ]
   },
   "license": "MIT",
   "devDependencies": {
@@ -55,13 +43,11 @@
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
     "@fortawesome/free-solid-svg-icons": "^7.1.0",
     "@fortawesome/react-fontawesome": "^3.1.0",
-    "@prisma/client": "^6.17.1",
     "@tailwindcss/vite": "^4.1.14",
     "electron-squirrel-startup": "^1.0.1",
     "electron-store": "^11.0.2",
     "jspdf": "^4.1.0",
     "jspdf-autotable": "^5.0.7",
-    "prisma": "^6.17.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.4",

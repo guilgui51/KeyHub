@@ -2,7 +2,6 @@ import {app, BrowserWindow, screen} from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import {registerAllIpcHandlers} from "./ipc";
-import {isDev} from "../prisma";
 import {loadSettings} from "./settings";
 import {startServer} from "./ipc/server";
 
@@ -29,7 +28,7 @@ const createWindow = () => {
     },
   });
   mainWindow.maximize();
-  if (!isDev) mainWindow.removeMenu();
+  if (app.isPackaged) mainWindow.removeMenu();
 
   // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
@@ -41,7 +40,7 @@ const createWindow = () => {
   }
 
   // Open the DevTools.
-  if (isDev) mainWindow.webContents.openDevTools();
+  if (!app.isPackaged) mainWindow.webContents.openDevTools();
 };
 
 // This method will be called when Electron has finished
