@@ -14,7 +14,6 @@ let currentPort = 5874;
 
 function notifyRenderer(namespace: string, keys: string[]) {
     for (const win of BrowserWindow.getAllWindows()) {
-        console.log('key received ',namespace,keys)
         win.webContents.send("server:keys-received", {namespace, keys});
     }
 }

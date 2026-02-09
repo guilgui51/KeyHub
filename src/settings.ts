@@ -8,6 +8,7 @@ const settingsPath = path.join(app.getPath("userData"), "settings.json");
 // Default values
 const defaultSettings: AppSettings = {
     rootFolder: null,
+    folderStructure: "namespaced",
     languages: [],
     serverPort: 5874,
     serverAutoStart: false,

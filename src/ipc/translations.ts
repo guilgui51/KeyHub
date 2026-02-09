@@ -27,6 +27,8 @@ export type TranslationsIPC = {
 };
 
 const LOCALE_REGEX = /^[a-z]{2}-[A-Z]{2}$/;
+const LOCALE_JSON_REGEX = /^[a-z]{2}-[A-Z]{2}\.json$/;
+const DEFAULT_NAMESPACE = "default";
 
 function scanJsonFiles(dirPath: string): TranslationFile[] {
     return fs.readdirSync(dirPath)
@@ -123,10 +125,17 @@ export function ensureFile(settings: AppSettings, langCode: string, namespace: s
 
     let file = lang.files.find((f) => f.namespace === namespace);
     if (!file && settings.rootFolder) {
-        const dirPath = path.join(settings.rootFolder, langCode);
-        if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, {recursive: true});
-        const filePath = path.join(dirPath, `${namespace}.json`);
-        fs.writeFileSync(filePath, JSON.stringify({}, null, 2), "utf8");
+        let filePath: string;
+        if (settings.folderStructure === "flat") {
+            filePath = path.join(settings.rootFolder, `${langCode}.json`);
+        } else {
+            const dirPath = path.join(settings.rootFolder, langCode);
+            if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, {recursive: true});
+            filePath = path.join(dirPath, `${namespace}.json`);
+        }
+        if (!fs.existsSync(filePath)) {
+            fs.writeFileSync(filePath, JSON.stringify({}, null, 2), "utf8");
+        }
         file = {absolutePath: filePath, namespace};
         lang.files.push(file);
         saveSettings(settings);
@@ -147,11 +156,27 @@ export function registerTranslationHandlers() {
         settings.rootFolder = rootPath;
         settings.languages = [];
 
+        // Try namespaced first: look for locale subdirectories
         for (const entry of entries) {
             if (!entry.isDirectory() || !LOCALE_REGEX.test(entry.name)) continue;
             const files = scanJsonFiles(path.join(rootPath, entry.name));
             if (files.length === 0) continue;
             settings.languages.push({code: entry.name, files});
+        }
+
+        if (settings.languages.length > 0) {
+            settings.folderStructure = "namespaced";
+        } else {
+            // Try flat: look for locale-named JSON files in root
+            for (const entry of entries) {
+                if (!entry.isFile() || !LOCALE_JSON_REGEX.test(entry.name)) continue;
+                const code = path.basename(entry.name, ".json");
+                settings.languages.push({
+                    code,
+                    files: [{absolutePath: path.join(rootPath, entry.name), namespace: DEFAULT_NAMESPACE}],
+                });
+            }
+            settings.folderStructure = settings.languages.length > 0 ? "flat" : "namespaced";
         }
 
         return saveSettings(settings);
@@ -163,23 +188,32 @@ export function registerTranslationHandlers() {
         if (!settings.rootFolder) return settings;
         if (settings.languages.some((l) => l.code === code)) return settings;
 
-        // Collect all existing namespaces
-        const allNamespaces = new Set<string>();
-        for (const lang of settings.languages) {
-            for (const file of lang.files) allNamespaces.add(file.namespace);
-        }
-
-        // Create the language folder and empty JSON files for each namespace
-        const dirPath = path.join(settings.rootFolder, code);
-        if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, {recursive: true});
-
         const files: TranslationFile[] = [];
-        for (const ns of allNamespaces) {
-            const filePath = path.join(dirPath, `${ns}.json`);
+
+        if (settings.folderStructure === "flat") {
+            // Flat mode: create a single file in root
+            const filePath = path.join(settings.rootFolder, `${code}.json`);
             if (!fs.existsSync(filePath)) {
                 fs.writeFileSync(filePath, JSON.stringify({}, null, 2), "utf8");
             }
-            files.push({absolutePath: filePath, namespace: ns});
+            files.push({absolutePath: filePath, namespace: DEFAULT_NAMESPACE});
+        } else {
+            // Namespaced mode: create subfolder with namespace files
+            const allNamespaces = new Set<string>();
+            for (const lang of settings.languages) {
+                for (const file of lang.files) allNamespaces.add(file.namespace);
+            }
+
+            const dirPath = path.join(settings.rootFolder, code);
+            if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, {recursive: true});
+
+            for (const ns of allNamespaces) {
+                const filePath = path.join(dirPath, `${ns}.json`);
+                if (!fs.existsSync(filePath)) {
+                    fs.writeFileSync(filePath, JSON.stringify({}, null, 2), "utf8");
+                }
+                files.push({absolutePath: filePath, namespace: ns});
+            }
         }
 
         settings.languages.push({code, files});

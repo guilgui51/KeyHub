@@ -214,7 +214,6 @@ async function translate(
     const cache = loadCache();
 
     // Check cache - only use if source text matches
-    console.log("Cache hit for key:", cacheKey, cache[cacheKey], cache[cacheKey].sourceText,text);
     if (cache[cacheKey] && cache[cacheKey].sourceText === text) {
         return cache[cacheKey].translation;
     }

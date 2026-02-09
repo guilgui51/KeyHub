@@ -21,10 +21,16 @@ function notifyChange() {
     window.dispatchEvent(new CustomEvent("translations-changed"));
 }
 
+/** Dispatch event to select a key in Home after creation */
+function notifySelectKey(namespace: string, key: string) {
+    window.dispatchEvent(new CustomEvent("select-key", {detail: {namespace, key}}));
+}
+
 export default function Navbar() {
     const navigate = useNavigate();
     const {addToast} = useToast();
     const [rootFolder, setRootFolder] = useState<string | null>(null);
+    const [folderStructure, setFolderStructure] = useState<"namespaced" | "flat">("namespaced");
     const [languages, setLanguages] = useState<TranslationLanguage[]>([]);
     const [namespaces, setNamespaces] = useState<string[]>([]);
 
@@ -51,6 +57,7 @@ export default function Navbar() {
     const loadSettings = async () => {
         const settings = await window.api["settings:get"]();
         setRootFolder(settings.rootFolder);
+        setFolderStructure(settings.folderStructure ?? "namespaced");
         setLanguages(settings.languages);
         setServerPort(settings.serverPort);
         // Collect unique namespaces
@@ -143,13 +150,16 @@ export default function Navbar() {
         setAddKeyOpen(true);
     };
 
+    const isFlat = folderStructure === "flat";
+
     const handleAddKey = async () => {
-        const ns = useNewNs ? newNsName.trim() : selectedNs;
+        const ns = isFlat ? "default" : (useNewNs ? newNsName.trim() : selectedNs);
         const key = newKeyName.trim();
         if (!ns || !key) return;
         await window.api["translations:addKey"](ns, key);
         setAddKeyOpen(false);
         notifyChange();
+        notifySelectKey(ns, key);
     };
 
     // ── Languages ────────────────────────────────────────────────────────
@@ -239,40 +249,42 @@ export default function Navbar() {
             {/* ── Add key modal ──────────────────────────────────────────── */}
             <Modal isOpen={addKeyOpen} onClose={() => setAddKeyOpen(false)} title="Ajouter une clé">
                 <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">Namespace (fichier)</label>
-                        {namespaces.length > 0 && (
-                            <div className="space-y-2">
-                                <select
-                                    value={useNewNs ? "__new__" : selectedNs}
-                                    onChange={(e) => {
-                                        if (e.target.value === "__new__") {
-                                            setUseNewNs(true);
-                                        } else {
-                                            setUseNewNs(false);
-                                            setSelectedNs(e.target.value);
-                                        }
-                                    }}
-                                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm font-mono focus:outline-none focus:border-green-500"
-                                >
-                                    {namespaces.map((ns) => (
-                                        <option key={ns} value={ns}>{ns}</option>
-                                    ))}
-                                    <option value="__new__">+ Nouveau namespace...</option>
-                                </select>
-                            </div>
-                        )}
-                        {(useNewNs || namespaces.length === 0) && (
-                            <input
-                                type="text"
-                                value={newNsName}
-                                onChange={(e) => setNewNsName(e.target.value)}
-                                placeholder="ex: common, errors, auth"
-                                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm font-mono focus:outline-none focus:border-green-500 mt-2"
-                                autoFocus={namespaces.length === 0}
-                            />
-                        )}
-                    </div>
+                    {!isFlat && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-1">Namespace (fichier)</label>
+                            {namespaces.length > 0 && (
+                                <div className="space-y-2">
+                                    <select
+                                        value={useNewNs ? "__new__" : selectedNs}
+                                        onChange={(e) => {
+                                            if (e.target.value === "__new__") {
+                                                setUseNewNs(true);
+                                            } else {
+                                                setUseNewNs(false);
+                                                setSelectedNs(e.target.value);
+                                            }
+                                        }}
+                                        className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm font-mono focus:outline-none focus:border-green-500"
+                                    >
+                                        {namespaces.map((ns) => (
+                                            <option key={ns} value={ns}>{ns}</option>
+                                        ))}
+                                        <option value="__new__">+ Nouveau namespace...</option>
+                                    </select>
+                                </div>
+                            )}
+                            {(useNewNs || namespaces.length === 0) && (
+                                <input
+                                    type="text"
+                                    value={newNsName}
+                                    onChange={(e) => setNewNsName(e.target.value)}
+                                    placeholder="ex: common, errors, auth"
+                                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm font-mono focus:outline-none focus:border-green-500 mt-2"
+                                    autoFocus={namespaces.length === 0}
+                                />
+                            )}
+                        </div>
+                    )}
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-1">Nom de la clé</label>
                         <input
@@ -282,7 +294,7 @@ export default function Navbar() {
                             onKeyDown={(e) => e.key === "Enter" && handleAddKey()}
                             placeholder="ex: myKey ou nested.subKey"
                             className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm font-mono focus:outline-none focus:border-green-500"
-                            autoFocus={namespaces.length > 0}
+                            autoFocus={isFlat || namespaces.length > 0}
                         />
                     </div>
                     <div className="flex justify-end gap-2 pt-2">
@@ -291,7 +303,7 @@ export default function Navbar() {
                         </button>
                         <button
                             onClick={handleAddKey}
-                            disabled={!(useNewNs ? newNsName.trim() : selectedNs) || !newKeyName.trim()}
+                            disabled={!isFlat && !(useNewNs ? newNsName.trim() : selectedNs) || !newKeyName.trim()}
                             className="px-4 py-1.5 rounded bg-green-600 hover:bg-green-500 disabled:opacity-40 disabled:cursor-not-allowed text-sm font-medium transition-colors cursor-pointer"
                         >
                             Ajouter

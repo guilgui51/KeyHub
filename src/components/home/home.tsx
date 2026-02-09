@@ -15,6 +15,7 @@ export default function Home() {
     const [hasFiles, setHasFiles] = useState(false);
     const [namespaces, setNamespaces] = useState<NamespaceData[]>([]);
     const [langCodes, setLangCodes] = useState<string[]>([]);
+    const [folderStructure, setFolderStructure] = useState<"namespaced" | "flat">("namespaced");
     const [search, setSearch] = useState("");
     const [selected, setSelected] = useState<SelectedKey | null>(null);
     const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
@@ -29,6 +30,7 @@ export default function Home() {
         const settings = await window.api["settings:get"]();
         const has = settings.languages.length > 0;
         setHasFiles(has);
+        setFolderStructure(settings.folderStructure ?? "namespaced");
         setLangCodes(settings.languages.map((l) => l.code));
         if (has) {
             setNamespaces(await window.api["translations:readAll"]());
@@ -47,6 +49,27 @@ export default function Home() {
         return () => window.removeEventListener("translations-changed", handler);
     }, [loadData]);
 
+    // Listen for select-key events (e.g. after navbar add-key)
+    useEffect(() => {
+        const handler = (e: Event) => {
+            const {namespace, key} = (e as CustomEvent).detail;
+            const parts = key.split(".");
+            setExpanded((prev) => {
+                const next = new Set(prev);
+                next.add(`ns:${namespace}`);
+                let path = "";
+                for (let i = 0; i < parts.length - 1; i++) {
+                    path = path ? `${path}.${parts[i]}` : parts[i];
+                    next.add(`${namespace}:${path}`);
+                }
+                return next;
+            });
+            setSelected({namespace, key});
+        };
+        window.addEventListener("select-key", handler);
+        return () => window.removeEventListener("select-key", handler);
+    }, []);
+
     const toggleExpand = useCallback((id: string) => {
         setExpanded((prev) => {
             const next = new Set(prev);
@@ -56,6 +79,8 @@ export default function Home() {
     }, []);
 
     // Build flat rows from tree
+    const isFlat = folderStructure === "flat";
+
     const flatRows = useMemo(() => {
         const q = search.toLowerCase().trim();
         const isSearching = q.length > 0;
@@ -69,14 +94,20 @@ export default function Home() {
                 tree = filterTree(tree, q);
                 if (tree.length === 0) continue;
             }
-            const nsId = `ns:${ns.namespace}`;
-            const nsExpanded = isSearching || expanded.has(nsId);
-            const counts = countKeys(tree, langCodes);
-            rows.push({type: "namespace", depth: 0, segment: ns.namespace, fullKey: `__ns__${ns.namespace}`, namespace: ns.namespace, completedCount: counts.completed, missingCount: counts.missing, expanded: nsExpanded});
-            if (nsExpanded) flattenTree(tree, ns.namespace, 1, rows, expanded, langCodes, isSearching);
+
+            if (isFlat) {
+                // Flat mode: skip namespace row, render keys at depth 0
+                flattenTree(tree, ns.namespace, 0, rows, expanded, langCodes, isSearching);
+            } else {
+                const nsId = `ns:${ns.namespace}`;
+                const nsExpanded = isSearching || expanded.has(nsId);
+                const counts = countKeys(tree, langCodes);
+                rows.push({type: "namespace", depth: 0, segment: ns.namespace, fullKey: `__ns__${ns.namespace}`, namespace: ns.namespace, completedCount: counts.completed, missingCount: counts.missing, expanded: nsExpanded});
+                if (nsExpanded) flattenTree(tree, ns.namespace, 1, rows, expanded, langCodes, isSearching);
+            }
         }
         return rows;
-    }, [namespaces, search, expanded, langCodes]);
+    }, [namespaces, search, expanded, langCodes, isFlat]);
 
     // Callbacks
     const handleSelectKey = useCallback((ns: string, key: string) => {
@@ -211,6 +242,7 @@ export default function Home() {
             <AddKeyModal
                 addKeyModal={addKeyModal}
                 newKeyName={newKeyName}
+                isFlat={isFlat}
                 onNewKeyNameChange={setNewKeyName}
                 onConfirm={handleAddKey}
                 onClose={() => setAddKeyModal(null)}
@@ -221,9 +253,10 @@ export default function Home() {
 
 // ── Add key modal (contextual, from tree + button) ───────────────────────
 
-function AddKeyModal({addKeyModal, newKeyName, onNewKeyNameChange, onConfirm, onClose}: {
+function AddKeyModal({addKeyModal, newKeyName, isFlat, onNewKeyNameChange, onConfirm, onClose}: {
     addKeyModal: {namespace: string; prefix: string} | null;
     newKeyName: string;
+    isFlat: boolean;
     onNewKeyNameChange: (v: string) => void;
     onConfirm: () => void;
     onClose: () => void;
@@ -232,10 +265,12 @@ function AddKeyModal({addKeyModal, newKeyName, onNewKeyNameChange, onConfirm, on
         <Modal isOpen={!!addKeyModal} onClose={onClose} title="Ajouter une clé">
             {addKeyModal && (
                 <div className="space-y-4">
-                    <div>
-                        <p className="text-xs text-gray-500 mb-1">Fichier</p>
-                        <p className="text-sm font-mono text-green-400">{addKeyModal.namespace}</p>
-                    </div>
+                    {!isFlat && (
+                        <div>
+                            <p className="text-xs text-gray-500 mb-1">Fichier</p>
+                            <p className="text-sm font-mono text-green-400">{addKeyModal.namespace}</p>
+                        </div>
+                    )}
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-1">Nom de la clé</label>
                         {addKeyModal.prefix && (

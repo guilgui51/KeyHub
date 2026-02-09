@@ -22,6 +22,7 @@ declare global {
 
     export interface AppSettings {
         rootFolder: string | null;
+        folderStructure: "namespaced" | "flat";
         languages: TranslationLanguage[];
         serverPort: number;
         serverAutoStart: boolean;

@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faXmark, faTriangleExclamation, faTrash, faLanguage, faSpinner} from "@fortawesome/free-solid-svg-icons";
 import {List, useListRef} from "react-window";
@@ -27,14 +27,28 @@ export default function DetailPanel({namespace, selectedKey, siblings, langCodes
     const parentPrefix = selectedKey.lastIndexOf(".") === -1 ? "" : selectedKey.substring(0, selectedKey.lastIndexOf("."));
     const listRef = useListRef();
     const rowHeight = useMemo(() => computeRowHeight(langCodes.length), [langCodes.length]);
+    const internalSelectRef = useRef(false);
 
-    // Scroll to the selected key when it changes
+    // Scroll to the selected key only when selection comes from outside (left panel)
     useEffect(() => {
+        if (internalSelectRef.current) {
+            internalSelectRef.current = false;
+            return;
+        }
         const idx = siblings.findIndex((s) => s.key === selectedKey);
         if (idx >= 0 && listRef.current) {
-            listRef.current.scrollToRow({index: idx, align: "smart"});
+            // Defer scroll to next frame so the List has time to measure/layout on first mount
+            const raf = requestAnimationFrame(() => {
+                listRef.current?.scrollToRow({index: idx, align: "start"});
+            });
+            return () => cancelAnimationFrame(raf);
         }
     }, [selectedKey, siblings]);
+
+    const handleInternalSelect = useCallback((ns: string, key: string) => {
+        internalSelectRef.current = true;
+        onSelectKey(ns, key);
+    }, [onSelectKey]);
 
     return (
         <div className="flex flex-col h-full">
@@ -57,7 +71,7 @@ export default function DetailPanel({namespace, selectedKey, siblings, langCodes
                     rowCount={siblings.length}
                     rowHeight={rowHeight}
                     rowComponent={SiblingRow}
-                    rowProps={{siblings, selectedKey, namespace, langCodes, onUpdateValue, onRemoveKey, onSelectKey}}
+                    rowProps={{siblings, selectedKey, namespace, langCodes, onUpdateValue, onRemoveKey, onSelectKey: handleInternalSelect}}
                 />
             </div>
         </div>
