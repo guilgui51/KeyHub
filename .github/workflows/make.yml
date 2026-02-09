@@ -2,11 +2,11 @@ name: Release (npm run make)
 
 on:
   push:
-    tags:
-      - "v*.*.*"
+    branches:
+      - master
 
 permissions:
-  contents: write   # nécessaire pour créer une release et uploader des assets
+  contents: write
 
 jobs:
   make-and-release-windows:
@@ -14,17 +14,50 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # needed to access tags
+
+      - name: Check version vs latest tag
+        id: version
+        shell: bash
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          LATEST_TAG=$(git tag --list "v*" --sort=-v:refname | head -n1)
+          echo "pkg_version=v${PKG_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Package version: v${PKG_VERSION}"
+          echo "Latest tag: ${LATEST_TAG:-none}"
+          if [ "v${PKG_VERSION}" = "${LATEST_TAG}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Skip — version unchanged
+        if: steps.version.outputs.skip == 'true'
+        run: echo "Version ${{ steps.version.outputs.pkg_version }} already released, skipping."
 
       - uses: actions/setup-node@v4
+        if: steps.version.outputs.skip == 'false'
         with:
           node-version: "20"
           cache: "npm"
 
       - run: npm ci
+        if: steps.version.outputs.skip == 'false'
+
       - run: npm run make
+        if: steps.version.outputs.skip == 'false'
+
+      - name: Create tag
+        if: steps.version.outputs.skip == 'false'
+        run: |
+          git tag ${{ steps.version.outputs.pkg_version }}
+          git push origin ${{ steps.version.outputs.pkg_version }}
 
       - name: Create GitHub Release + upload assets
+        if: steps.version.outputs.skip == 'false'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.version.outputs.pkg_version }}
           files: |
             out/make/**/**/*.exe
